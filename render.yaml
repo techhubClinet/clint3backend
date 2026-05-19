@@ -1,0 +1,17 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: creative-ops-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      # Set these in the Render dashboard (secrets):
+      # MONGODB_URI, JWT_SECRET, CLIENT_ORIGIN,
+      # CLOUDINARY_* (optional), ENABLE_SCHEDULED_BACKUPS
