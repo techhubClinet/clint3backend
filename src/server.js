@@ -3,7 +3,7 @@ import cron from "node-cron";
 import { connectDb } from "./config/db.js";
 import { configureCloudinary, isCloudinaryConfigured } from "./config/cloudinary.js";
 import { settings, isVercel } from "./config/settings.js";
-import { createApp } from "./app.js";
+import { createApp } from "./expressApp.js";
 import {
   exportFullDatabaseBackup,
   uploadBackupToCloudinary,

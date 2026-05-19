@@ -1,9 +1,10 @@
 /**
- * Vercel serverless entry — export Express app directly (required by @vercel/node).
- * DB connects on first request via ensureDbMiddleware in createApp().
+ * Vercel serverless entry — must default-export a function (not the Express app object).
  */
-import { createApp } from "../src/app.js";
+import { createApp } from "../src/expressApp.js";
 
 const app = createApp();
 
-export default app;
+export default function handler(req, res) {
+  return app(req, res);
+}
