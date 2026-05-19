@@ -19,17 +19,23 @@ export async function connectDb(uri) {
   if (!cache.promise) {
     cache.promise = mongoose
       .connect(uri, {
-        serverSelectionTimeoutMS: 10000,
-        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 15000,
+        maxPoolSize: 5,
+        bufferCommands: false,
       })
       .then((m) => {
         console.log("[db] Connected");
+        cache.conn = m;
         return m;
+      })
+      .catch((err) => {
+        cache.promise = null;
+        cache.conn = null;
+        throw err;
       });
   }
 
-  cache.conn = await cache.promise;
-  return cache.conn;
+  return cache.promise;
 }
 
 export async function disconnectDb() {

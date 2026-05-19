@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 
 import { settings, isVercel } from "./config/settings.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { ensureDbMiddleware } from "./middleware/ensureDb.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import brandsRoutes from "./routes/brands.routes.js";
@@ -27,9 +28,15 @@ export function createApp() {
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
+    ...(isVercel() ? { validate: { trustProxy: false } } : {}),
   });
 
   app.set("trust proxy", 1);
+
+  if (isVercel()) {
+    app.use(ensureDbMiddleware);
+  }
+
   app.use(helmet());
   app.use(limiter);
   app.use(
@@ -39,6 +46,17 @@ export function createApp() {
     })
   );
   app.use(express.json({ limit: jsonLimit }));
+
+  app.get("/", (req, res) => {
+    res.json({
+      name: "Creative Ops API",
+      status: "ok",
+      health: "/health",
+      docs: "See backend/README.md",
+    });
+  });
+
+  app.get("/favicon.ico", (req, res) => res.status(204).end());
 
   app.get("/health", (req, res) => {
     res.json({
