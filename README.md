@@ -20,7 +20,7 @@ Production-oriented REST backend for the Creative Ops React app: JWT authenticat
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env — set MONGODB_URI, JWT_SECRET, ADMIN_* for seeding
+# Edit src/config/settings.js — mongodbUri, jwtSecret, adminEmail, adminPassword
 npm install --cache ./.npm-cache   # or npm install if ~/.npm is writable
 ```
 
@@ -40,21 +40,21 @@ npm run dev
 
 Health check: `GET http://localhost:4000/health`
 
-## Environment variables
+## Configuration (`src/config/settings.js`)
 
-| Variable | Description |
-|----------|-------------|
-| `PORT` | Listen port (default `4000`) |
-| `MONGODB_URI` | MongoDB connection string (**required**) |
-| `JWT_SECRET` | Secret for signing JWT (**required** in production) |
-| `JWT_EXPIRES_IN` | e.g. `7d` |
-| `CLIENT_ORIGIN` | CORS origin for your React app |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Used only by `npm run seed:admin` |
-| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Media + optional scheduled backups |
-| `CLOUDINARY_UPLOAD_FOLDER` | Prefix folder (default `creative-ops`) |
-| `ENABLE_SCHEDULED_BACKUPS` | `true` to run cron JSON dumps to Cloudinary |
-| `BACKUP_CRON` | Cron expression (default `0 3 * * *` daily 03:00) |
-| `BACKUP_TIMEZONE` | IANA timezone for cron (default `UTC`) |
+All settings are in **`src/config/settings.js`** (no `.env` required on Vercel):
+
+| Key | Description |
+|-----|-------------|
+| `port` | Listen port (default `4000`) |
+| `mongodbUri` | MongoDB connection string |
+| `jwtSecret` | Secret for signing JWT |
+| `jwtExpiresIn` | e.g. `7d` |
+| `clientOrigin` | CORS origin for your React app |
+| `adminEmail` / `adminPassword` | Admin login + `npm run seed:admin` |
+| `cloudinaryCloudName` / `cloudinaryApiKey` / `cloudinaryApiSecret` | Media + optional backups |
+| `enableScheduledBackups` | `true` for daily JSON dumps (local server only) |
+| `nodeEnv` | `development` or `production` |
 
 ## API overview
 
@@ -142,7 +142,49 @@ Same idea: Node service, `npm start`, inject the same env vars. Fly.io can keep 
 
 ### Vercel
 
-Vercel is serverless-oriented; long-lived cron and large upload bodies map better to Render/Railway/Fly for this API.
+The backend is configured for Vercel serverless (`api/index.js` + `vercel.json`).
+
+**Deploy steps**
+
+1. Push this repo to GitHub (or connect your Git provider in Vercel).
+2. In [Vercel](https://vercel.com/new): **Add New Project** → import the repo.
+3. Set **Root Directory** to `backend` (important).
+4. Framework Preset: **Other** (Vercel auto-detects `vercel.json`).
+5. Edit **`src/config/settings.js`** before deploy:
+   - `nodeEnv: "production"`
+   - `clientOrigin` — your frontend URL (e.g. `https://your-frontend.vercel.app`)
+   - `mongodbUri`, `jwtSecret`, `adminEmail`, `adminPassword` — already in the file
+
+6. Deploy. **No Vercel environment variables needed.** API URL: `https://<project>.vercel.app/health`
+
+**After deploy — create admin**
+
+```bash
+cd backend
+npm run seed:admin
+```
+
+**Point the frontend at Vercel**
+
+Edit `frontend/src/appConfig.js`:
+
+```js
+export const API_BASE_URL = "https://<project>.vercel.app";
+```
+
+**Vercel limitations**
+
+- **No cron backups** on Vercel (serverless has no long-running process). Use MongoDB Atlas backups or `POST /api/backup/upload-remote` manually.
+- **Request body ~4.5MB** on Vercel. Large JSON imports may fail; use `npm run import:backup` from your machine for full backups, or import in smaller chunks.
+- **Cold starts**: first request after idle can take a few seconds while MongoDB connects.
+
+**CLI deploy** (optional)
+
+```bash
+cd backend
+npx vercel          # first time — link project
+npx vercel --prod   # production deploy
+```
 
 ## Database backups
 
@@ -164,7 +206,7 @@ Each record is keyed by `(brandId + id)` so re-importing the same backup updates
 
 The single-file UI `creative-ops-system (12).jsx` now supports optional cloud sync:
 
-1. Set **`VITE_API_URL`** in your Vite env (e.g. `https://your-api.onrender.com`) **or** assign **`window.__CREATIVE_OPS_API__`** before the app loads.
+1. Set **`API_BASE_URL`** in `frontend/src/appConfig.js` (e.g. `https://your-api.vercel.app`).
 2. Open **Settings → Data Management → Backend API**, log in with your admin account.
 3. Edits debounce to the server (~500ms): deleted rows are removed via the API, then the current snapshot is upserted with `POST /api/import/json`. Local `window.storage` is still updated as a cache/offline copy.
 

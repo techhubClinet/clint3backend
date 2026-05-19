@@ -1,17 +1,14 @@
 import { v2 as cloudinary } from "cloudinary";
+import { settings } from "./settings.js";
 
 export function configureCloudinary() {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-    process.env;
-  if (
-    CLOUDINARY_CLOUD_NAME &&
-    CLOUDINARY_API_KEY &&
-    CLOUDINARY_API_SECRET
-  ) {
+  const { cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret } =
+    settings;
+  if (cloudinaryCloudName && cloudinaryApiKey && cloudinaryApiSecret) {
     cloudinary.config({
-      cloud_name: CLOUDINARY_CLOUD_NAME,
-      api_key: CLOUDINARY_API_KEY,
-      api_secret: CLOUDINARY_API_SECRET,
+      cloud_name: cloudinaryCloudName,
+      api_key: cloudinaryApiKey,
+      api_secret: cloudinaryApiSecret,
     });
     return true;
   }
@@ -20,8 +17,8 @@ export function configureCloudinary() {
 
 export function isCloudinaryConfigured() {
   return !!(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
+    settings.cloudinaryCloudName &&
+    settings.cloudinaryApiKey &&
+    settings.cloudinaryApiSecret
   );
 }

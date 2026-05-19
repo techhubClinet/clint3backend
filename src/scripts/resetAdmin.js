@@ -1,19 +1,19 @@
 /**
- * Create or update admin from ADMIN_EMAIL / ADMIN_PASSWORD in .env
+ * Create or update admin from src/config/settings.js
  * Usage: npm run reset:admin
  */
-import "dotenv/config";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import { settings } from "../config/settings.js";
 import { User } from "../models/User.js";
 
 async function run() {
-  const uri = process.env.MONGODB_URI;
-  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD;
+  const uri = settings.mongodbUri;
+  const email = settings.adminEmail?.trim().toLowerCase();
+  const password = settings.adminPassword;
 
   if (!uri || !email || !password) {
-    console.error("Set MONGODB_URI, ADMIN_EMAIL, ADMIN_PASSWORD in .env");
+    console.error("Set mongodbUri, adminEmail, adminPassword in src/config/settings.js");
     process.exit(1);
   }
 

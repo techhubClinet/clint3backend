@@ -11,6 +11,7 @@ import {
   toClientIdea,
 } from "../utils/serialize.js";
 import { isCloudinaryConfigured, configureCloudinary } from "../config/cloudinary.js";
+import { settings } from "../config/settings.js";
 
 export async function exportBrandBackup(brandId) {
   const brand = await Brand.findById(brandId);
@@ -70,7 +71,7 @@ export async function uploadBackupToCloudinary(jsonObject, filenamePrefix = "db-
   configureCloudinary();
 
   const buf = Buffer.from(JSON.stringify(jsonObject, null, 2), "utf8");
-  const folder = process.env.CLOUDINARY_UPLOAD_FOLDER || "creative-ops";
+  const folder = settings.cloudinaryUploadFolder;
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 
   return new Promise((resolve, reject) => {

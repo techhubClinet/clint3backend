@@ -2,13 +2,13 @@
  * Import creative-ops JSON backup into MongoDB via API.
  * Usage: node src/scripts/importBackupFile.js [path-to-backup.json] [brandName]
  */
-import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { settings } from "../config/settings.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const base = (process.env.API_BASE || "http://127.0.0.1:4000").replace(/\/$/, "");
+const base = settings.apiBase.replace(/\/$/, "");
 
 const backupPath =
   process.argv[2] ||
@@ -16,10 +16,10 @@ const backupPath =
 const brandName = process.argv[3] || "OriginDrops";
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+  const email = settings.adminEmail;
+  const password = settings.adminPassword;
   if (!email || !password) {
-    console.error("Set ADMIN_EMAIL and ADMIN_PASSWORD in backend/.env");
+    console.error("Set adminEmail and adminPassword in src/config/settings.js");
     process.exit(1);
   }
   if (!fs.existsSync(backupPath)) {

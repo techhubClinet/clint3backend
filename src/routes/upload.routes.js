@@ -8,6 +8,7 @@ import {
   configureCloudinary,
   isCloudinaryConfigured,
 } from "../config/cloudinary.js";
+import { settings } from "../config/settings.js";
 import { MediaAsset } from "../models/MediaAsset.js";
 import mongoose from "mongoose";
 
@@ -36,7 +37,7 @@ router.post(
       throw new AppError('Missing file field "file"', 400);
     }
 
-    const folder = process.env.CLOUDINARY_UPLOAD_FOLDER || "creative-ops";
+    const folder = settings.cloudinaryUploadFolder;
     const brandIdRaw = req.body.brandId || req.query.brandId;
     let brandId;
     if (brandIdRaw && mongoose.isValidObjectId(brandIdRaw)) {

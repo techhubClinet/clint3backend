@@ -1,19 +1,19 @@
 /**
  * One-time admin creation: npm run seed:admin
- * Requires ADMIN_EMAIL, ADMIN_PASSWORD, MONGODB_URI in .env
+ * Uses adminEmail / adminPassword / mongodbUri from src/config/settings.js
  */
-import "dotenv/config";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import { settings } from "../config/settings.js";
 import { User } from "../models/User.js";
 
 async function run() {
-  const uri = process.env.MONGODB_URI;
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+  const uri = settings.mongodbUri;
+  const email = settings.adminEmail;
+  const password = settings.adminPassword;
 
   if (!uri || !email || !password) {
-    console.error("Set MONGODB_URI, ADMIN_EMAIL, ADMIN_PASSWORD in .env");
+    console.error("Set mongodbUri, adminEmail, adminPassword in src/config/settings.js");
     process.exit(1);
   }
 

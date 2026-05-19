@@ -3,11 +3,11 @@
  * Terminal 1: npm run dev   (or: node src/server.js)
  * Terminal 2: npm run test:flow
  *
- * Requires in .env: MONGODB_URI, JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+ * Uses src/config/settings.js
  */
-import "dotenv/config";
+import { settings } from "../config/settings.js";
 
-const base = (process.env.API_BASE || "http://127.0.0.1:4000").replace(/\/$/, "");
+const base = settings.apiBase.replace(/\/$/, "");
 
 async function req(path, { method = "GET", token, body } = {}) {
   const headers = { Accept: "application/json" };
@@ -36,8 +36,8 @@ function fail(msg) {
 }
 
 async function main() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
+  const email = settings.adminEmail;
+  const password = settings.adminPassword;
 
   console.log("Creative Ops API smoke test");
   console.log("Base URL:", base);

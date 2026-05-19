@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import multer from "multer";
+import { isProduction } from "../config/settings.js";
 
 export function errorHandler(err, req, res, next) {
   if (err instanceof multer.MulterError) {
@@ -7,7 +8,7 @@ export function errorHandler(err, req, res, next) {
   }
   const status = err.statusCode || 500;
   const message =
-    status === 500 && process.env.NODE_ENV === "production"
+    status === 500 && isProduction()
       ? "Internal server error"
       : err.message;
 
@@ -27,8 +28,6 @@ export function errorHandler(err, req, res, next) {
 
   res.status(status).json({
     error: message,
-    ...(process.env.NODE_ENV !== "production" && err.stack
-      ? { stack: err.stack }
-      : {}),
+    ...(!isProduction() && err.stack ? { stack: err.stack } : {}),
   });
 }

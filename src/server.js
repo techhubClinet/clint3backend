@@ -1,77 +1,29 @@
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import cron from "node-cron";
 
 import { connectDb } from "./config/db.js";
 import { configureCloudinary, isCloudinaryConfigured } from "./config/cloudinary.js";
-import { errorHandler } from "./middleware/errorHandler.js";
-
-import authRoutes from "./routes/auth.routes.js";
-import brandsRoutes from "./routes/brands.routes.js";
-import batchesRoutes from "./routes/batches.routes.js";
-import loopsRoutes from "./routes/loops.routes.js";
-import docsRoutes from "./routes/docs.routes.js";
-import ideasRoutes from "./routes/ideas.routes.js";
-import importRoutes from "./routes/import.routes.js";
-import uploadRoutes from "./routes/upload.routes.js";
-import backupRoutes from "./routes/backup.routes.js";
-
+import { settings, isVercel } from "./config/settings.js";
+import { createApp } from "./app.js";
 import {
   exportFullDatabaseBackup,
   uploadBackupToCloudinary,
 } from "./services/backupService.js";
 
-const app = express();
-const PORT = Number(process.env.PORT) || 4000;
-
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.set("trust proxy", 1);
-app.use(helmet());
-app.use(limiter);
-app.use(
-  cors({
-    origin: process.env.CLIENT_ORIGIN || "*",
-    credentials: true,
-  })
-);
-app.use(express.json({ limit: "80mb" }));
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true, uptime: process.uptime() });
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api/brands", brandsRoutes);
-app.use("/api/brands/:brandId/batches", batchesRoutes);
-app.use("/api/brands/:brandId/loops", loopsRoutes);
-app.use("/api/brands/:brandId/docs", docsRoutes);
-app.use("/api/brands/:brandId/ideas", ideasRoutes);
-app.use("/api/import", importRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/backup", backupRoutes);
-
-app.use(errorHandler);
+const app = createApp();
+const PORT = settings.port;
 
 async function startScheduledBackups() {
-  if (process.env.ENABLE_SCHEDULED_BACKUPS !== "true") return;
+  if (isVercel()) return;
+  if (!settings.enableScheduledBackups) return;
   if (!isCloudinaryConfigured()) {
     console.warn(
-      "[backup] Scheduled backups disabled: Cloudinary not configured"
+      "[backup] Scheduled backups disabled: Cloudinary not configured in settings.js"
     );
     return;
   }
   configureCloudinary();
-  const expr = process.env.BACKUP_CRON || "0 3 * * *";
-  const tz = process.env.BACKUP_TIMEZONE || "UTC";
+  const expr = settings.backupCron;
+  const tz = settings.backupTimezone;
   cron.schedule(
     expr,
     async () => {
@@ -89,13 +41,13 @@ async function startScheduledBackups() {
 }
 
 async function main() {
-  const uri = process.env.MONGODB_URI;
+  const uri = settings.mongodbUri;
   if (!uri) {
-    console.error("Missing MONGODB_URI");
+    console.error("mongodbUri missing in src/config/settings.js");
     process.exit(1);
   }
-  if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
-    console.error("Missing JWT_SECRET in production");
+  if (!settings.jwtSecret && settings.nodeEnv === "production") {
+    console.error("jwtSecret missing in src/config/settings.js");
     process.exit(1);
   }
 

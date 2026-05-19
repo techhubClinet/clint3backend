@@ -1,15 +1,16 @@
 import jwt from "jsonwebtoken";
+import { settings } from "../config/settings.js";
 
 export function signToken(payload) {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET is not configured");
+  const secret = settings.jwtSecret;
+  if (!secret) throw new Error("jwtSecret is not configured in settings.js");
   return jwt.sign(payload, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    expiresIn: settings.jwtExpiresIn,
   });
 }
 
 export function verifyToken(token) {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET is not configured");
+  const secret = settings.jwtSecret;
+  if (!secret) throw new Error("jwtSecret is not configured in settings.js");
   return jwt.verify(token, secret);
 }
