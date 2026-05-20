@@ -7,8 +7,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
+    "start": "node src/localServer.js",
+    "dev": "node --watch src/localServer.js",
     "seed:admin": "node src/scripts/seedAdmin.js",
     "reset:admin": "node src/scripts/resetAdmin.js",
     "test:flow": "node src/scripts/smokeFlow.js",

@@ -1,9 +1,9 @@
 /**
- * Primary Vercel entry (project root). Rewrites in vercel.json send all traffic here.
+ * Vercel entry — must import "express" directly (required by Vercel Express detection).
  */
-import { createServer } from "node:http";
+import express from "express";
 import { createApp } from "./src/expressApp.js";
 
-const server = createServer(createApp());
+const app = createApp();
 
-export default server;
+export default app;

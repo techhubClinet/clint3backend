@@ -1,3 +1,7 @@
+/**
+ * Local development server only (not used on Vercel).
+ * Run: npm run dev  |  npm start
+ */
 import cron from "node-cron";
 
 import { connectDb } from "./config/db.js";
