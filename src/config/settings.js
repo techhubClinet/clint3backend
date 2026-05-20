@@ -5,7 +5,11 @@
 export const settings = {
   nodeEnv: process.env.VERCEL ? "production" : "development",
   port: 4000,
-  clientOrigin: "http://localhost:5173",
+  /** Allowed browser origins (no trailing slash) */
+  clientOrigins: [
+    "https://client3-frontend.vercel.app",
+    "http://localhost:5173",
+  ],
 
   mongodbUri:
     "mongodb+srv://ali:ali@cluster0.o8bu9nt.mongodb.net/creative_ops?retryWrites=true&w=majority&appName=Cluster0",

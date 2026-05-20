@@ -41,7 +41,9 @@ export function createApp() {
   app.use(limiter);
   app.use(
     cors({
-      origin: settings.clientOrigin || "*",
+      origin: settings.clientOrigins?.length
+        ? settings.clientOrigins
+        : "*",
       credentials: true,
     })
   );
