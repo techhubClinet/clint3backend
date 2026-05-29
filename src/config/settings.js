@@ -17,8 +17,8 @@ export const settings = {
   jwtSecret: "creative-ops-jwt-secret-replace-with-long-random-string",
   jwtExpiresIn: "7d",
 
-  adminEmail: "admin1234@gmail.com",
-  adminPassword: "admin1234",
+  adminEmail: "mullabackend@gmail.com",
+  adminPassword: "paf582kAm$",
 
   cloudinaryCloudName: "",
   cloudinaryApiKey: "",

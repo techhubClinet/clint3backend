@@ -19,6 +19,10 @@ async function run() {
 
   await mongoose.connect(uri);
   const passwordHash = await bcrypt.hash(password, 12);
+  const removed = await User.deleteMany({ role: "admin", email: { $ne: email } });
+  if (removed.deletedCount > 0) {
+    console.log("Removed old admin account(s):", removed.deletedCount);
+  }
   const user = await User.findOneAndUpdate(
     { email },
     { email, passwordHash, role: "admin" },
